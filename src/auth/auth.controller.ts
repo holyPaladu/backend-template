@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
@@ -12,8 +12,16 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'User successfully logged in.' })
   @Post('login')
-  async login(@Body() req) {
-    return this.authService.login(req);
+  async login(@Body() body) {
+    const { username, password } = body;
+    // Вызываем validateUser для проверки логина
+    const user = await this.authService.validateUser(username, password);
+    // Если пользователь не прошел валидацию
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    // Если пользователь валидный, вызываем login и возвращаем токен
+    return this.authService.login(user);
   }
 
   @ApiOperation({ summary: 'User registration' })
