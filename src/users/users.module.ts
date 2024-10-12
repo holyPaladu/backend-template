@@ -2,11 +2,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
-import { User } from './user.entitty'; // Импортируйте User сущность
+import { UsersController } from './users.controller';
+import { User } from './user.entitty';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])], // Регистрация User сущности
+  imports: [TypeOrmModule.forFeature([User])],
   providers: [UsersService],
-  exports: [UsersService], // Экспортируйте, если необходимо использовать в других модулях
+  exports: [UsersService],
+  controllers: [UsersController],
 })
 export class UsersModule {}
