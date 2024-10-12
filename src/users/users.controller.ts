@@ -1,7 +1,7 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
-import { User } from './user.entitty';
+import { User } from './user.entity';
 
 @ApiTags('Users')
 @Controller('users')
