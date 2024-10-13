@@ -25,9 +25,23 @@ export class AuthService {
     if (!user) {
       throw new Error('Invalid user credentials'); // Можно заменить на кастомную ошибку или сообщение
     }
+
+    // Возвращаем существующий токен, если он уже создан
+    if (user.accessToken) {
+      return {
+        access_token: user.accessToken,
+      };
+    }
+
+    // Если токена нет, создаем новый
     const payload = { username: user.username, sub: user.userId };
+    const accessToken = this.jwtService.sign(payload);
+
+    // Обновляем токен в базе данных
+    await this.usersService.updateToken(user.userId, accessToken);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
     };
   }
 
@@ -41,8 +55,13 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    // Возвращаем данные пользователя без пароля
-    const { password: _, ...result } = newUser;
-    return result;
+    // Создаем токен и обновляем пользователя
+    const payload = { username: newUser.username, sub: newUser.id }; // Теперь newUser.id доступен
+    const accessToken = this.jwtService.sign(payload);
+    await this.usersService.updateToken(newUser.id, accessToken);
+
+    // Возвращаем данные пользователя без пароля и токена
+    const { password: _, accessToken: __, ...result } = newUser;
+    return result; // Вернуть результат без пароля и токена
   }
 }

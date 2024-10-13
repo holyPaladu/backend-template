@@ -7,15 +7,34 @@ import { User } from './user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async findOneByUsername(username: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({ where: { username } });
+    return this.userRepository.findOne({ where: { username } });
   }
 
-  async create(userData: Partial<User>): Promise<User> {
-    const newUser = this.usersRepository.create(userData);
-    return this.usersRepository.save(newUser);
+  async findAll(): Promise<User[] | null> {
+    const result = await this.userRepository.find({
+      order: {
+        id: 'ASC',
+      },
+    });
+    return result.length > 0 ? result : null;
+  }
+
+  async create(user: Omit<User, 'id'>): Promise<User> {
+    const newUser = this.userRepository.create(user);
+    return this.userRepository.save(newUser);
+  }
+
+  async updateToken(userId: number, accessToken: string): Promise<void> {
+    await this.userRepository.update(userId, { accessToken });
+  }
+
+  // Новый метод для удаления пользователя
+  async remove(userId: number): Promise<boolean> {
+    const result = await this.userRepository.delete(userId);
+    return result.affected > 0;
   }
 }

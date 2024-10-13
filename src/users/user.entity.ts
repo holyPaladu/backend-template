@@ -6,9 +6,12 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   username: string;
 
   @Column()
   password: string;
+
+  @Column({ nullable: true }) // Это поле может быть пустым, если токен не создан
+  accessToken?: string;
 }
