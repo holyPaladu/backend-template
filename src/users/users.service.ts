@@ -32,9 +32,20 @@ export class UsersService {
     await this.userRepository.update(userId, { accessToken });
   }
 
-  // Новый метод для удаления пользователя
-  async remove(userId: number): Promise<boolean> {
-    const result = await this.userRepository.delete(userId);
-    return result.affected > 0;
+  async remove(id: number): Promise<boolean> {
+    const user = await this.findOneById(id);
+
+    if (!user) {
+      return false; // Возвращаем false, если пользователь не найден
+    }
+
+    // Логика удаления пользователя
+    await this.userRepository.delete(id);
+
+    return true; // Возвращаем true, если удаление успешно
+  }
+  async findOneById(id: number) {
+    // Логика поиска пользователя по ID
+    return this.userRepository.findOne({ where: { id } });
   }
 }

@@ -35,6 +35,10 @@ export class UsersController {
   @Delete(':id')
   async deleteUser(@Param('id') id: number): Promise<{ success: boolean }> {
     const success = await this.usersService.remove(id);
+    // Если метод remove вернет false (или null), выбрасываем исключение
+    if (!success) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
     return { success };
   }
 }
