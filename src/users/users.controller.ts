@@ -16,10 +16,10 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @ApiOperation({ summary: 'Find all users' })
-  @ApiResponse({ status: 200, description: 'Find all users', type: [UserDto] })
+  @ApiResponse({ status: 200, description: 'Find all users' })
   @ApiResponse({ status: 404, description: 'Users table empty' })
   @Get()
-  async findAll(): Promise<UserDto[] | { message: string }> {
+  async findAll(): Promise<User[] | { message: string }> {
     const users = await this.usersService.findAll();
 
     if (users.length === 0) {
@@ -28,25 +28,6 @@ export class UsersController {
 
     // return users.map(({ id, username }) => new UserDto({ id, username }));
     return users;
-  }
-
-  @ApiOperation({ summary: 'Find user by username' })
-  @ApiResponse({ status: 200, description: 'Find user', type: UserDto })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @Get(':username')
-  async findUserByUsername(
-    @Param('username') username: string,
-  ): Promise<UserDto> {
-    const user = await this.usersService.findOneByUsername(username);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const { id, username: userName } = user;
-
-    // return new UserDto({ id, username: userName });
-    return user;
   }
 
   @ApiOperation({ summary: 'Delete user by id' })
