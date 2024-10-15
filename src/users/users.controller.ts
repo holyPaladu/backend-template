@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { UserDto } from './dto/users.dto';
 
 @ApiTags('Users')
@@ -19,7 +19,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Find all users' })
   @ApiResponse({ status: 404, description: 'Users table empty' })
   @Get()
-  async findAll(): Promise<User[] | { message: string }> {
+  async findAll(): Promise<UserEntity[] | { message: string }> {
     const users = await this.usersService.findAll();
 
     if (users.length === 0) {
