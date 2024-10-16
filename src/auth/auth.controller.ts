@@ -1,6 +1,20 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiConsumes,
+} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @ApiTags('Authorization')
@@ -9,27 +23,50 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiOperation({ summary: 'User login' })
-  @ApiBody({ type: LoginDto })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Login with file',
+    type: LoginDto,
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: 'User successfully logged in.' })
+  @UseInterceptors(FileInterceptor('file'))
   @Post('login')
-  async login(@Body() body) {
-    const { username, password } = body;
+  async login(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() loginDto: LoginDto,
+  ) {
+    const { username, password } = loginDto;
     // Вызываем validateUser для проверки логина
     const user = await this.authService.validateUser(username, password);
     // Если пользователь не прошел валидацию
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    if (file) {
+      console.log('File uploaded:', file);
+    }
     // Если пользователь валидный, вызываем login и возвращаем токен
     return this.authService.login(user);
   }
 
   @ApiOperation({ summary: 'User registration' })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User successfully registered.' })
   @Post('register')
-  async register(@Body() body) {
-    const { username, password } = body;
+  async register(@Body() regsiterDto: RegisterDto) {
+    const { username, password } = regsiterDto;
     return this.authService.register(username, password);
   }
 }
