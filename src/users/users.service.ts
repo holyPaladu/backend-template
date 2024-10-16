@@ -44,6 +44,7 @@ export class UsersService {
 
     return true; // Возвращаем true, если удаление успешно
   }
+
   async findOneById(id: number) {
     // Логика поиска пользователя по ID
     return this.userRepository.findOne({ where: { id } });

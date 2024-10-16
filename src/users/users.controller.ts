@@ -19,15 +19,15 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Find all users' })
   @ApiResponse({ status: 404, description: 'Users table empty' })
   @Get()
-  async findAll(): Promise<UserEntity[] | { message: string }> {
+  async findAll(): Promise<UserDto[] | { message: string }> {
     const users = await this.usersService.findAll();
 
     if (users.length === 0) {
       return { message: 'No users found' };
     }
 
-    // return users.map(({ id, username }) => new UserDto({ id, username }));
-    return users;
+    return users.map(({ id, username }) => new UserDto({ id, username }));
+    // return users;
   }
 
   @ApiOperation({ summary: 'Delete user by id' })

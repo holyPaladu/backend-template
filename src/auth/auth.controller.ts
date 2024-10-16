@@ -14,7 +14,7 @@ import {
   ApiResponse,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, NoFilesInterceptor } from '@nestjs/platform-express';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @ApiTags('Authorization')
@@ -24,37 +24,17 @@ export class AuthController {
 
   @ApiOperation({ summary: 'User login' })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Login with file',
-    type: LoginDto,
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'User successfully logged in.' })
-  @UseInterceptors(FileInterceptor('file'))
   @Post('login')
-  async login(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() loginDto: LoginDto,
-  ) {
+  @UseInterceptors(NoFilesInterceptor())
+  async login(@Body() loginDto: LoginDto) {
     const { username, password } = loginDto;
     // Вызываем validateUser для проверки логина
     const user = await this.authService.validateUser(username, password);
     // Если пользователь не прошел валидацию
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
-    }
-    if (file) {
-      console.log('File uploaded:', file);
     }
     // Если пользователь валидный, вызываем login и возвращаем токен
     return this.authService.login(user);
@@ -65,6 +45,7 @@ export class AuthController {
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User successfully registered.' })
   @Post('register')
+  @UseInterceptors(NoFilesInterceptor())
   async register(@Body() regsiterDto: RegisterDto) {
     const { username, password } = regsiterDto;
     return this.authService.register(username, password);
