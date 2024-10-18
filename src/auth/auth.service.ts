@@ -23,26 +23,21 @@ export class AuthService {
 
   async login(user: any) {
     if (!user) {
-      throw new Error('Invalid user credentials'); // Можно заменить на кастомную ошибку или сообщение
+      throw new Error('Invalid user credentials');
     }
 
-    // Возвращаем существующий токен, если он уже создан
-    if (user.accessToken) {
-      return {
-        access_token: user.accessToken,
-      };
+    let accessToken = user.accessToken;
+
+    // Если токена нет, создаём новый
+    if (!accessToken) {
+      const payload = { username: user.username, sub: user.id };
+      accessToken = this.jwtService.sign(payload);
+      await this.usersService.updateToken(user.id, accessToken);
     }
 
-    // Если токена нет, создаем новый
-    const payload = { username: user.username, sub: user.userId };
-    const accessToken = this.jwtService.sign(payload);
-
-    // Обновляем токен в базе данных
-    await this.usersService.updateToken(user.userId, accessToken);
-
-    return {
-      access_token: accessToken,
-    };
+    // Возвращаем нужные поля, добавив или заменив accessToken
+    const { id: _, ...result } = user;
+    return result;
   }
 
   async register(username: string, password: string) {
