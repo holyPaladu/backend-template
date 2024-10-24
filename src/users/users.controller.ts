@@ -4,11 +4,21 @@ import {
   Get,
   NotFoundException,
   Param,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { UserEntity } from './user.entity';
 import { UserDto } from './dto/users.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from '../auth/decorators/user.decorator';
 
 @ApiTags('Users')
 @Controller('users')
@@ -40,5 +50,14 @@ export class UsersController {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return { success };
+  }
+
+  @ApiOperation({ summary: 'Protected data with JWT token' })
+  @ApiResponse({ status: 200, description: 'Correct validate JWT token' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Get('protected')
+  getProtectedData(@User() user: UserDto) {
+    return user;
   }
 }

@@ -7,6 +7,9 @@ export class UserDto {
   @IsString()
   username: string;
 
+  @IsString()
+  password: string;
+
   constructor(partial: Partial<UserDto>) {
     Object.assign(this, partial);
   }

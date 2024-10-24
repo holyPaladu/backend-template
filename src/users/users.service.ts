@@ -22,6 +22,9 @@ export class UsersService {
     });
     return result.length > 0 ? result : null;
   }
+  async findById(id: number): Promise<UserEntity> {
+    return this.userRepository.findOne({ where: { id } });
+  }
 
   async create(user: Omit<UserEntity, 'id'>): Promise<UserEntity> {
     const newUser = this.userRepository.create(user);

@@ -26,18 +26,17 @@ export class AuthService {
       throw new Error('Invalid user credentials');
     }
 
-    let accessToken = user.accessToken;
+    // Генерация нового accessToken при каждом логине
+    const payload = { username: user.username, sub: user.id };
+    const newAccessToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-    // Если токена нет, создаём новый
-    if (!accessToken) {
-      const payload = { username: user.username, sub: user.id };
-      accessToken = this.jwtService.sign(payload);
-      await this.usersService.updateToken(user.id, accessToken);
-    }
+    // Обновляем токен в базе данных
+    await this.usersService.updateToken(user.id, newAccessToken);
 
-    // Возвращаем нужные поля, добавив или заменив accessToken
-    const { id: _, ...result } = user;
-    return result;
+    // Возвращаем обновлённые данные пользователя с новым accessToken
+    const { id: _, accessToken, ...result } = user;
+
+    return { ...result, accessToken: newAccessToken };
   }
 
   async register(username: string, password: string) {
@@ -51,8 +50,8 @@ export class AuthService {
     });
 
     // Создаем токен и обновляем пользователя
-    const payload = { username: newUser.username, sub: newUser.id }; // Теперь newUser.id доступен
-    const accessToken = this.jwtService.sign(payload);
+    const payload = { username: newUser.username, sub: newUser.id };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '7d' });
     await this.usersService.updateToken(newUser.id, accessToken);
 
     // Возвращаем данные пользователя без пароля и токена
