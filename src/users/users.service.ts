@@ -36,7 +36,7 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<boolean> {
-    const user = await this.findOneById(id);
+    const user = await this.findById(id);
 
     if (!user) {
       return false; // Возвращаем false, если пользователь не найден
@@ -46,10 +46,5 @@ export class UsersService {
     await this.userRepository.delete(id);
 
     return true; // Возвращаем true, если удаление успешно
-  }
-
-  async findOneById(id: number) {
-    // Логика поиска пользователя по ID
-    return this.userRepository.findOne({ where: { id } });
   }
 }

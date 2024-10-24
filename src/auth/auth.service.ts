@@ -35,6 +35,7 @@ export class AuthService {
 
     // Возвращаем обновлённые данные пользователя с новым accessToken
     const { id: _, accessToken, ...result } = user;
+    //const { id: _, username, accessToken, ...result } = user; // в дестурикторизации первый с _ потом осталные игнорируемые через ,
 
     return { ...result, accessToken: newAccessToken };
   }
